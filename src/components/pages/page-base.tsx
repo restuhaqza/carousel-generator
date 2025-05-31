@@ -5,17 +5,20 @@ import { getSlideNumber } from "@/lib/field-path";
 import { useSelection } from "@/lib/hooks/use-selection";
 import { useSelectionContext } from "@/lib/providers/selection-context";
 
+interface PageBaseProps extends React.HTMLAttributes<HTMLDivElement> {
+  size: { width: number; height: number };
+  children: React.ReactNode;
+  fieldName: string;
+  className?: string;
+}
+
 export function PageBase({
   size,
   children,
   fieldName,
   className,
-}: {
-  size: { width: number; height: number };
-  children: React.ReactNode;
-  fieldName: string;
-  className?: string;
-}) {
+  ...props
+}: PageBaseProps) {
   const { currentSelection } = useSelectionContext();
   const pageNumber = getSlideNumber(fieldName);
 
@@ -34,6 +37,7 @@ export function PageBase({
         minWidth: `${size.width}px`,
         minHeight: `${size.height}px`,
       }}
+      {...props}
     >
       {children}
     </div>

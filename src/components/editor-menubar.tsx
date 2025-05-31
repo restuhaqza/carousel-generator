@@ -4,7 +4,6 @@ import { DocumentFormReturn } from "@/lib/document-form-types";
 import { Loader2Icon } from "lucide-react";
 import React, { useState } from "react";
 import { JsonExporter } from "./json-exporter";
-import { JsonImporter } from "./json-importer";
 import { FilenameForm } from "./forms/filename-form";
 import {
   Menubar,
@@ -26,10 +25,14 @@ import FileInputForm from "./forms/file-input-form";
 import { useFieldsFileImporter } from "@/lib/hooks/use-fields-file-importer";
 import { usePagerContext } from "@/lib/providers/pager-context";
 import { defaultValues } from "@/lib/default-document";
+import { useToast } from "@/components/ui/use-toast";
+
+const LOCAL_STORAGE_CONFIG_KEY = "carouselGeneratorConfig";
 
 export function EditorMenubar({}: {}) {
-  const { reset, watch }: DocumentFormReturn = useFormContext(); // retrieve those props
+  const { reset, watch, getValues }: DocumentFormReturn = useFormContext();
   const { setCurrentPage } = usePagerContext();
+  const { toast } = useToast();
 
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
   const { handleFileSubmission: handleConfigFileSubmission } =
@@ -39,16 +42,39 @@ export function EditorMenubar({}: {}) {
   const { handleFileSubmission: handleContentFileSubmission } =
     useFieldsFileImporter("slides");
 
+  const handleSaveConfiguration = () => {
+    try {
+      const currentConfig = getValues("config");
+      localStorage.setItem(
+        LOCAL_STORAGE_CONFIG_KEY,
+        JSON.stringify(currentConfig)
+      );
+      toast({
+        title: "Configuration Saved",
+        description: "Your settings have been saved to local storage.",
+      });
+    } catch (error) {
+      console.error("Failed to save configuration:", error);
+      toast({
+        title: "Error Saving Configuration",
+        description:
+          "Could not save settings to local storage. Check console for details.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    // TODO: Add Here download and help
     <div className="flex items-center flex-row gap-2">
       <Menubar>
         <MenubarMenu>
           <MenubarTrigger>File</MenubarTrigger>
           <MenubarContent>
-            {/* <MenubarItem > */}
             <FilenameForm className={"text-left my-1"} />
-            {/* </MenubarItem> */}
+            <MenubarSeparator />
+            <MenubarItem onClick={handleSaveConfiguration}>
+              Save Configuration
+            </MenubarItem>
             <MenubarSeparator />
             <JsonExporter
               values={watch("config")}
@@ -120,11 +146,8 @@ export function EditorMenubar({}: {}) {
                 setCurrentPage(0);
               }}
             >
-              {/* TODO: This should have a confirmation alert dialog */}
               Reset to defaults
             </MenubarItem>
-            {/* <MenubarSeparator /> */}
-            {/* <MenubarItem>Print</MenubarItem> */}
           </MenubarContent>
         </MenubarMenu>
       </Menubar>

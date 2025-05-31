@@ -82,6 +82,7 @@ module.exports = {
         inter: ["var(--font-inter)"],
         syne: ["var(--font-syne)"],
         "archivo-black": ["var(--font-archivo-black)"],
+        "space-grotesk": ["var(--font-space-grotesk)"],
       },
     },
   },

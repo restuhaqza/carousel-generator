@@ -62,12 +62,19 @@ export function CommonPage({
     // TODO ADD dependencies
   );
   const remainingHeight = elementsHeight
-    ? size.height - FRAME_PADDING * 2 - footerDimensions.height - elementsHeight
+    ? size.height -
+      FRAME_PADDING * 2 -
+      (footerDimensions.height ?? 0) -
+      elementsHeight
     : 0;
 
   return (
-    <PageBase size={size} fieldName={backgroundImageField}>
-      <BackgroundLayer background={config.theme.background} className="-z-20" />
+    <PageBase
+      size={size}
+      fieldName={backgroundImageField}
+      data-page-content="true"
+    >
+      <BackgroundLayer theme={config.theme} className="-z-20" />
       {slide.backgroundImage?.source.src ? (
         <BackgroundImageLayer image={slide.backgroundImage} className="-z-10" />
       ) : null}

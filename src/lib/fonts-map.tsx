@@ -52,6 +52,10 @@ export const fontsMap: FontMap = {
     className: "font-archivo-black",
     name: "Archivo Black",
   },
+  Space_Grotesk: {
+    className: "font-space-grotesk",
+    name: "Space Grotesk",
+  },
 };
 
 export function fontIdToClassName(fontId: string) {

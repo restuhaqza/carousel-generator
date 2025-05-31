@@ -1,15 +1,17 @@
 import { useFormContext } from "react-hook-form";
 import * as z from "zod";
+import React from "react";
 
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { ColorPickerInput } from "./fields/color-picker-input";
 
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { pallettes } from "@/lib/pallettes";
@@ -17,25 +19,60 @@ import { CustomIndicatorRadioGroupItem } from "../custom-indicator-radio-group-i
 import { ColorThemeDisplay } from "../color-theme-display";
 import { DocumentFormReturn } from "@/lib/document-form-types";
 import { Checkbox } from "../ui/checkbox";
+import { GradientDirectionEnum } from "@/lib/validation/theme-schema";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function PalletteSelector({ form }: { form: DocumentFormReturn }) {
   const { control, setValue } = form;
 
   return (
     <FormField
-      control={control}
+      control={control as any}
       name="config.theme.pallette"
       render={({ field }) => (
         <FormItem className="space-y-3">
-          <FormLabel>Select a pallette</FormLabel>
+          <FormLabel>Select a palette</FormLabel>
           <FormControl>
             <RadioGroup
-              onValueChange={(value) => {
-                const colors = pallettes[value];
-                setValue("config.theme.primary", colors.primary);
-                setValue("config.theme.secondary", colors.secondary);
-                setValue("config.theme.background", colors.background);
-                setValue("config.theme.pallette", value);
+              onValueChange={(palletteName) => {
+                const selectedPallette = pallettes[palletteName];
+                setValue("config.theme.primary", selectedPallette.primary);
+                setValue("config.theme.secondary", selectedPallette.secondary);
+                setValue(
+                  "config.theme.backgroundType",
+                  selectedPallette.backgroundType || "solid"
+                );
+
+                if (selectedPallette.backgroundType === "gradient") {
+                  setValue(
+                    "config.theme.gradientStartColor",
+                    selectedPallette.gradientStartColor
+                  );
+                  setValue(
+                    "config.theme.gradientEndColor",
+                    selectedPallette.gradientEndColor
+                  );
+                  setValue(
+                    "config.theme.gradientDirection",
+                    selectedPallette.gradientDirection
+                  );
+                  setValue("config.theme.background", undefined);
+                } else {
+                  setValue(
+                    "config.theme.background",
+                    selectedPallette.background
+                  );
+                  setValue("config.theme.gradientStartColor", undefined);
+                  setValue("config.theme.gradientEndColor", undefined);
+                  setValue("config.theme.gradientDirection", undefined);
+                }
+                setValue(field.name, palletteName);
               }}
               defaultValue={field.value}
               className="grid grid-cols-3 space-y-1"
@@ -50,7 +87,6 @@ function PalletteSelector({ form }: { form: DocumentFormReturn }) {
                       <ColorThemeDisplay colors={colors} />
                     </CustomIndicatorRadioGroupItem>
                   </FormControl>
-                  {/* <FormLabel className="font-normal">Huemint 1</FormLabel> */}
                 </FormItem>
               ))}
             </RadioGroup>
@@ -63,69 +99,143 @@ function PalletteSelector({ form }: { form: DocumentFormReturn }) {
 }
 
 function CustomColors({ form }: { form: DocumentFormReturn }) {
-  // TODO: popover with picker from github.com/casesandberg/react-color or github.com/omgovich/react-colorful
+  const backgroundType = form.watch("config.theme.backgroundType");
+
   return (
     <>
+      <ColorPickerInput name="config.theme.primary" label="Primary Color" />
+      <ColorPickerInput name="config.theme.secondary" label="Secondary Color" />
+
       <FormField
-        control={form.control}
-        name="config.theme.primary"
+        control={form.control as any}
+        name="config.theme.backgroundType"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Primary</FormLabel>
+          <FormItem className="space-y-3">
+            <FormLabel>Background Type</FormLabel>
             <FormControl>
-              <Input placeholder="Primary color" className="" {...field} />
+              <RadioGroup
+                onValueChange={field.onChange}
+                defaultValue={field.value ?? "solid"}
+                className="flex space-x-2"
+              >
+                <FormItem className="flex items-center space-x-3 space-y-0">
+                  <FormControl>
+                    <RadioGroupItem value="solid" />
+                  </FormControl>
+                  <FormLabel className="font-normal">Solid</FormLabel>
+                </FormItem>
+                <FormItem className="flex items-center space-x-3 space-y-0">
+                  <FormControl>
+                    <RadioGroupItem value="gradient" />
+                  </FormControl>
+                  <FormLabel className="font-normal">Gradient</FormLabel>
+                </FormItem>
+              </RadioGroup>
             </FormControl>
+            <FormDescription>
+              Select whether to use a solid color or a gradient for the
+              background.
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
-      <FormField
-        control={form.control}
-        name="config.theme.secondary"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Secondary</FormLabel>
-            <FormControl>
-              <Input placeholder="Secondary color" className="" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="config.theme.background"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Background</FormLabel>
-            <FormControl>
-              <Input placeholder="Background color" className="" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+
+      {backgroundType === "solid" && (
+        <ColorPickerInput
+          name="config.theme.background"
+          label="Background Color"
+        />
+      )}
+
+      {backgroundType === "gradient" && (
+        <div className="space-y-6 p-4 border rounded-md">
+          <h4 className="text-md font-medium">Gradient Options</h4>
+          <ColorPickerInput
+            name="config.theme.gradientStartColor"
+            label="Start Color"
+          />
+          <ColorPickerInput
+            name="config.theme.gradientEndColor"
+            label="End Color"
+          />
+          <FormField
+            control={form.control as any}
+            name="config.theme.gradientDirection"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Direction</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a direction" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {GradientDirectionEnum.options.map((direction) => (
+                      <SelectItem key={direction} value={direction}>
+                        {direction}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      )}
     </>
   );
 }
 
 export function ThemeForm({}: {}) {
-  const form: DocumentFormReturn = useFormContext(); // retrieve those props
-  const { watch } = form;
+  const form: DocumentFormReturn = useFormContext();
+  const { watch, setValue, getValues } = form;
   const isCustom = watch("config.theme.isCustom");
+
+  React.useEffect(() => {
+    if (isCustom && getValues("config.theme.backgroundType") === undefined) {
+      setValue("config.theme.backgroundType", "solid", {
+        shouldValidate: false,
+      });
+    }
+  }, [isCustom, setValue, getValues]);
+
   return (
-    // TODO: check on custom color to enable/disable pallette custom colors
     <Form {...form}>
-      <form className="space-y-6 w-full py-4">
+      <form className="space-y-8 w-full py-4">
         <FormField
-          control={form.control}
+          control={form.control as any}
           name="config.theme.isCustom"
           render={({ field }) => (
             <FormItem className="flex flex-row items-start space-x-3 space-y-0">
               <FormControl>
                 <Checkbox
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    if (checked) {
+                      if (
+                        getValues("config.theme.backgroundType") === undefined
+                      ) {
+                        setValue("config.theme.backgroundType", "solid", {
+                          shouldValidate: true,
+                        });
+                      }
+                      if (
+                        getValues("config.theme.backgroundType") === "solid" &&
+                        !getValues("config.theme.background")
+                      ) {
+                        setValue("config.theme.background", "#FFFFFF", {
+                          shouldValidate: true,
+                        });
+                      }
+                    }
+                  }}
                 />
               </FormControl>
               <div className="space-y-1 leading-none text-base">

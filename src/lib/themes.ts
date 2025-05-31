@@ -14,6 +14,10 @@ export interface Theme {
   success?: string;
   warning?: string;
   error?: string;
+  backgroundType?: "solid" | "gradient";
+  gradientStartColor?: string;
+  gradientEndColor?: string;
+  gradientDirection?: string;
 }
 const themes: Record<string, Theme> = {
   aqua: {
@@ -28,6 +32,7 @@ const themes: Record<string, Theme> = {
     success: "#16a34a",
     warning: "#d97706",
     error: "oklch(73.95% 0.19 27.33)",
+    backgroundType: "solid",
   },
   black: {
     "color-scheme": "dark",
@@ -40,6 +45,7 @@ const themes: Record<string, Theme> = {
     success: "#008000",
     warning: "#ffff00",
     error: "#ff0000",
+    backgroundType: "solid",
   },
   bumblebee: {
     "color-scheme": "light",
@@ -50,6 +56,7 @@ const themes: Record<string, Theme> = {
     accent: "oklch(81.27% 0.157 56.52)",
     neutral: "oklch(12.75% 0.075 281.99)",
     "base-100": "oklch(100% 0 0)",
+    backgroundType: "solid",
   },
   cmyk: {
     "color-scheme": "light",
@@ -405,6 +412,60 @@ const themes: Record<string, Theme> = {
     success: "#addfad",
     warning: "#f1c891",
     error: "#ffbbbd",
+  },
+  "sunset-burst": {
+    "color-scheme": "dark",
+    primary: "#FFD700",
+    "primary-content": "#4d3800",
+    secondary: "#FF8C00",
+    accent: "#FF4500",
+    neutral: "#2F1B05",
+    "base-100": "#212121",
+    "base-content": "#f8f8f2",
+    info: "#87CEEB",
+    success: "#32CD32",
+    warning: "#FFD700",
+    error: "#DC143C",
+    backgroundType: "gradient",
+    gradientStartColor: "#FF4500",
+    gradientEndColor: "#FF8C00",
+    gradientDirection: "to bottom right",
+  },
+  "ocean-breeze": {
+    "color-scheme": "light",
+    primary: "#00BFFF",
+    "primary-content": "#00334d",
+    secondary: "#AFEEEE",
+    accent: "#40E0D0",
+    neutral: "#F0F8FF",
+    "base-100": "#E0FFFF",
+    "base-content": "#2F4F4F",
+    info: "#87CEFA",
+    success: "#98FB98",
+    warning: "#F0E68C",
+    error: "#FF6347",
+    backgroundType: "gradient",
+    gradientStartColor: "#AFEEEE",
+    gradientEndColor: "#00BFFF",
+    gradientDirection: "to top left",
+  },
+  "purple-dream": {
+    "color-scheme": "dark",
+    primary: "#DA70D6",
+    "primary-content": "#3c133a",
+    secondary: "#BA55D3",
+    accent: "#9370DB",
+    neutral: "#1A101F",
+    "base-100": "#281430",
+    "base-content": "#f8f8f2",
+    info: "#DDA0DD",
+    success: "#90EE90",
+    warning: "#FFDEAD",
+    error: "#CD5C5C",
+    backgroundType: "gradient",
+    gradientStartColor: "#4B0082",
+    gradientEndColor: "#8A2BE2",
+    gradientDirection: "to bottom",
   },
 };
 
